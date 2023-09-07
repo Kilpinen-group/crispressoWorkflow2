@@ -1,0 +1,16 @@
+name: crispresso
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base
+  - python
+  - snakemake
+  - crispresso2 
+  - r-ggplot2
+  - r-data.table
+  - cutadapt
+  - fastqc
+  - multiqc
+  - r-reshape2

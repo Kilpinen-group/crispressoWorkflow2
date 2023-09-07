@@ -1,0 +1,10 @@
+{
+	"THREAD_PER_SAMPLE": 5,
+	"FASTQ_PATH": "/mnt/d/PostdocUnsync/03_crispr/202309_Nelli/crispr202309_data/FASTQ",
+	"OUTPUT_PATH": "/mnt/d/PostdocUnsync/03_crispr/202309_Nelli/crispr202309_data",
+	"PLATE_METADATA_PATH":"/mnt/d/PostdocUnsync/03_crispr/202309_Nelli/crispr202309_data/metadata/plateAnnotCrispresso.tsv",
+	"PAIR_END_FILE_PATTERN":"_R",
+	"FASTQ_EXTENSION":"_001.fastq.gz",
+	"CUTADAPT_MIN_READ_LEN":10
+}
+
