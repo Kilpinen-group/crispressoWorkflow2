@@ -37,44 +37,78 @@ plateData<-fastRead(plate_meta_path)
 plates<-rownames(plateData)
 
 stats<-res<-list();for(P in plates){
-	statsTmp<-fastRead(paste0("CRISPAGGR/CRISPRessoAggregate_on_",P,"/CRISPRessoAggregate_mapping_statistics.txt"),row.names = NULL)
-	resTmp<-fastRead(paste0("CRISPAGGR/CRISPRessoAggregate_on_",P,"/CRISPRessoAggregate_quantification_of_editing_frequency_by_amplicon.txt"),row.names = NULL)
-	sampleNames<-substr(basename(statsTmp$Folder),15,nchar(basename(statsTmp$Folder)))
-	statsTmp$sample<-sampleNames
-	resTmp$sample<-sampleNames
-	
-	resTmp$plate<-P
-	statsTmp$plate<-P
-	
-	stats[[P]]<-statsTmp
-	res[[P]]<-resTmp
-	
+    statsTmp<-fastRead(paste0("CRISPAGGR/CRISPRessoAggregate_on_",P,"/CRISPRessoAggregate_mapping_statistics.txt"),row.names = NULL)
+    resTmp<-fastRead(paste0("CRISPAGGR/CRISPRessoAggregate_on_",P,"/CRISPRessoAggregate_quantification_of_editing_frequency_by_amplicon.txt"),row.names = NULL)
+    sampleNames<-substr(basename(statsTmp$Folder),15,nchar(basename(statsTmp$Folder)))
+    statsTmp$sample<-substr(basename(statsTmp$Folder),15,nchar(basename(statsTmp$Folder)))
+    resTmp$sample<-substr(basename(resTmp$Folder),15,nchar(basename(resTmp$Folder)))
+    
+    resTmp$plate<-P
+    statsTmp$plate<-P
+    
+    stats[[P]]<-statsTmp
+    res[[P]]<-resTmp
+    
 };stats<-do.call("rbind",stats);res<-do.call("rbind",res)
 
-resFormated<-data.frame(row.names = unique(res$sample))
-resFormated$nAligned<-res[res$Amplicon=="Reference","Reads_aligned_all_amplicons"]
-resFormated$plate<-res[res$Amplicon=="Reference","plate"]
+resFormated <- data.frame(
+    row.names = unique(res$sample),
+    plate = res[res$Amplicon == "Reference", "plate"],
+    nTotal = res[res$Amplicon == "Reference", "Reads_in_input"],
+    nAligned = res[res$Amplicon == "Reference", "Reads_aligned_all_amplicons"]
+)
+resFormated$nUnaligned <- resFormated$nTotal - resFormated$nAligned
 
-for(col in unique(res$Amplicon)){
-	resFormated[,paste0("n",col)]<-res[res$Amplicon==col,"Reads_aligned"]
-	resFormated[,paste0("unmodified",col)]<-res[res$Amplicon==col,"Unmodified"]
-	resFormated[,paste0("modified",col)]<-res[res$Amplicon==col,"Modified"]
+amplicons <- unique(res$Amplicon)
+for(ampl in amplicons){
+    resOfAmp<-res[res$Amplicon==ampl,]
+    rownames(resOfAmp) <- resOfAmp$sample
+    nReadCol <- paste0("n",ampl)
+    nUnmodifCol <- paste0("unmodified",ampl)
+    nModifCol <- paste0("modified",ampl)
+    
+    resFormated[,nReadCol] <- NA
+    resFormated[rownames(resOfAmp),nReadCol]<-resOfAmp$Reads_aligned
+    
+    resFormated[,nUnmodifCol] <- NA
+    resFormated[rownames(resOfAmp),nUnmodifCol]<-resOfAmp$Unmodified
+    
+    resFormated[,nModifCol] <- NA
+    resFormated[rownames(resOfAmp),nModifCol]<-resOfAmp$Modified
 }
+
+resFormated$nAmbiguous<- resFormated$nAligned - rowSums(resFormated[,paste0("n",amplicons)],na.rm = TRUE)
 
 fastWrite(res,"results/resultsAggr.tsv",row.names = F)
 fastWrite(stats,"results/statsAggr.tsv",row.names = F)
 fastWrite(resFormated,"results/resultsFormatted.tsv")
 
-resFormated2plot<-resFormated[resFormated$nAligned>10,c(grep("modif",colnames(resFormated),value=TRUE),"plate")]
+resFormated2plot<-resFormated[resFormated$nAligned>10,c("nUnaligned","nAmbiguous",grep("modif",colnames(resFormated),value=TRUE),"plate")]
 resFormated2plot$sample<-rownames(resFormated2plot)
 
-ggData<-reshape2::melt(resFormated2plot,value.name = "n",variable.name="seqType")
+ggData<-reshape2::melt(resFormated2plot,value.name = "n",variable.name="amplicon")
+
+if (nlevels(ggData$amplicon) == 6){
+    colorScale <- c("black","grey50","#66B32E","#B8CCA8","#E52421","#E58887")
+}else if (nlevels(ggData$amplicon) == 8){
+    colorScale <- c("black","grey50","#66B32E","#B8CCA8","#0057A5","#ABD7FF","#E52421","#E58887")
+}else{
+    colorScale <- rainbow(nlevels(ggData$amplicon))
+}
+
 
 pdf("results/propAmpliconPerPlate.pdf",width = 20,height = 15)
-print(ggplot(ggData,mapping=aes(x=sample,y=n,fill=seqType))+
-	geom_bar(position="fill", stat="identity",color="black")+theme_bw()+
-	theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=.3,face = "bold"))+
-	facet_wrap(vars(plate),scales = "free_x",ncol = 2)+
-	scale_fill_manual(values = c("#E52421","#E58887","#66B32E","#B8CCA8"))
+print(ggplot(ggData,mapping=aes(x=sample,y=n,fill=amplicon))+
+          geom_bar(position="fill", stat="identity",color="black")+theme_bw()+
+          theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=.3,face = "bold"))+
+          facet_wrap(vars(plate),scales = "free_x",ncol = 2)+
+          scale_fill_manual(values = colorScale)+
+          ylab("%")
+)
+print(ggplot(ggData,mapping=aes(x=sample,y=n,fill=amplicon))+
+          geom_bar(stat="identity",color="black")+theme_bw()+
+          theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=.3,face = "bold"))+
+          facet_wrap(vars(plate),scales = "free_x",ncol = 2)+
+          scale_fill_manual(values = colorScale)
 )
 dev.off()
