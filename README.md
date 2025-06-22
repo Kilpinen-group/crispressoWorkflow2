@@ -27,7 +27,7 @@ mamba env create -f condaEnv.yml
     - afterHDR: expected sequence after HDR (*-e* in crispresso)
     - gRNA: sgRNA sequence (passed as flexiguide to crispresso, *-fg*)
     - For more details go to [crispresso2 repository](https://github.com/pinellolab/CRISPResso2)
-    - To avoid any error, you can simply copy the [example plate annotation file](https://github.com/Kilpinen-group/crispressoWorkflow2/blob/main/example/plateAnnotCrispresso.tsv)
+    - To avoid any error, you can simply copy the [example plate annotation file](https://github.com/Kilpinen-group/crispressoWorkflow2/blob/main/example/plateAnnotCrispresso.tsv), and then modify it
     
 - config file (*config.json*). You can edit the one which is in the workflow directory
     Parameters:
