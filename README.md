@@ -23,10 +23,11 @@ mamba env create -f condaEnv.yml
 - The plate annotation file in .tsv format (see in example folder):
     - each row is a plate
     - Adapters sequences will be passed to *cutadapt*.
-    - Original column: passed to *-a* argument in crispresso, amplicon sequences. Several caqn be provided, *e.g.* for dealing with heterozygous samples
+    - Original column: passed to *-a* argument in crispresso, amplicon sequences. Several can be provided, *e.g.* for dealing with heterozygous samples
     - afterHDR: expected sequence after HDR (*-e* in crispresso)
     - gRNA: sgRNA sequence (passed as flexiguide to crispresso, *-fg*)
-    For more details go to [crispresso2 repository](https://github.com/pinellolab/CRISPResso2)
+    For more details go to [crispresso2 repository](https://github.com/pinellolab/CRISPResso2).
+    To avoid any error, you can simply copy the [example plate annotation file](https://github.com/Kilpinen-group/crispressoWorkflow2/blob/main/example/plateAnnotCrispresso.tsv)
     
 - config file (*config.json*). You can edit the one which is in the workflow directory
     Parameters:
