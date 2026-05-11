@@ -88,14 +88,21 @@ resFormated2plot$sample<-rownames(resFormated2plot)
 
 ggData<-reshape2::melt(resFormated2plot,value.name = "n",variable.name="amplicon")
 
-if (nlevels(ggData$amplicon) == 6){
-    colorScale <- c("black","grey50","#66B32E","#B8CCA8","#E52421","#E58887")
-}else if (nlevels(ggData$amplicon) == 8){
-    colorScale <- c("black","grey50","#66B32E","#B8CCA8","#0057A5","#ABD7FF","#E52421","#E58887")
-}else{
-    colorScale <- rainbow(nlevels(ggData$amplicon))
-}
+#if (nlevels(ggData$amplicon) == 6){
+#    colorScale <- c("black","grey50","#66B32E","#B8CCA8","#E52421","#E58887")
+#}else if (nlevels(ggData$amplicon) == 8){
+#    colorScale <- c("black","grey50","#66B32E","#B8CCA8","#0057A5","#ABD7FF","#E52421","#E58887")
+#}else{
+#    colorScale <- rainbow(nlevels(ggData$amplicon))
+#}
 
+if (nlevels(ggData$amplicon) == 6){
+   colorScale <- c(“black”,“grey50",“#66B32E”,“#B8CCA8",“#D81BCC”,“#E25BD9")
+}else if (nlevels(ggData$amplicon) == 8){
+   colorScale <- c(“black”,“grey50",“#66B32E”,“#B8CCA8",“#0057A5”,“#ABD7FF”,“#D81BCC”,“#E25BD9")
+}else{
+   colorScale <- rainbow(nlevels(ggData$amplicon))
+}
 
 pdf("results/propAmpliconPerPlate.pdf",width = 20,height = 15)
 print(ggplot(ggData,mapping=aes(x=sample,y=n,fill=amplicon))+
